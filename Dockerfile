@@ -37,9 +37,12 @@ RUN set -ex \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
     && rm -rf /var/lib/apt/lists/*
 
+# Create user, since running as root is insecure:
+RUN useradd --create-home --home-dir /code appuser
+USER appuser
+
 # Copy your application code to the container (make sure you create a .dockerignore file if any large files or directories should be excluded)
-RUN mkdir /code/
-WORKDIR /code/
+WORKDIR /code
 ADD . /code/
 
 # uWSGI will listen on this port
@@ -55,7 +58,7 @@ RUN DATABASE_URL='' /venv/bin/python manage.py collectstatic --noinput
 ENV UWSGI_WSGI_FILE=my_project/wsgi.py
 
 # Base uWSGI configuration (you shouldn't need to change these):
-ENV UWSGI_VIRTUALENV=/venv UWSGI_HTTP=:8000 UWSGI_MASTER=1 UWSGI_HTTP_AUTO_CHUNKED=1 UWSGI_HTTP_KEEPALIVE=1 UWSGI_UID=1000 UWSGI_GID=2000 UWSGI_LAZY_APPS=1 UWSGI_WSGI_ENV_BEHAVIOR=holy
+ENV UWSGI_VIRTUALENV=/venv UWSGI_HTTP=:8000 UWSGI_MASTER=1 UWSGI_HTTP_AUTO_CHUNKED=1 UWSGI_HTTP_KEEPALIVE=1 UWSGI_LAZY_APPS=1 UWSGI_WSGI_ENV_BEHAVIOR=holy
 
 # Number of uWSGI workers and threads per worker (customize as needed):
 ENV UWSGI_WORKERS=2 UWSGI_THREADS=4
