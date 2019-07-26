@@ -42,7 +42,7 @@ RUN useradd --create-home --home-dir /code appuser
 USER appuser
 
 # Copy your application code to the container (make sure you create a .dockerignore file if any large files or directories should be excluded)
-WORKDIR /code
+WORKDIR /code/
 ADD . /code/
 
 # uWSGI will listen on this port
